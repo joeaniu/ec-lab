@@ -17,7 +17,7 @@ application {
     mainClassName = "net.thiki.eclab.yaml2zk.Yaml2zkBootstrap"
 }
 
-val developmentOnly by configurations.creating
+val developmentOnly: Configuration by configurations.creating
 configurations {
     runtimeClasspath {
         extendsFrom(developmentOnly)
@@ -29,6 +29,9 @@ repositories {
 }
 
 //extra["slf4j.version"] = "1.7.20"
+val curatorVersion = "4.0.1"
+val zookeeperVersion = "3.5.5"
+
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
@@ -38,6 +41,17 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
+
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.10.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.0")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.0")
+
+    implementation("org.apache.zookeeper:zookeeper:${zookeeperVersion}") {
+        exclude(group = "org.slf4j", module = "slf4j-log4j12")
+    }
+    implementation("org.apache.curator:curator-x-async:${curatorVersion}")
+    implementation("org.apache.curator:curator-x-discovery:${curatorVersion}")
+
 }
 
 tasks.withType<Test> {
