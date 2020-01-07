@@ -12,23 +12,30 @@ import java.nio.file.Paths
 import java.util.*
 
 @SpringBootApplication
-class Yaml2zkBootstrap
+class Yaml2zkBootstrap{
 
-fun main(args: Array<String>) {
-    runApplication<Yaml2zkBootstrap>(*args)
+    companion object{
 
-    //https://www.baeldung.com/jackson
+        @JvmStatic
+        fun main(args: Array<String>) {
+            runApplication<Yaml2zkBootstrap>(*args)
 
-    assert(args.size == 1) {
-        "usage: java -jar yaml2zk-xxx.jar file"
+            //https://www.baeldung.com/jackson
+
+            assert(args.size == 2) {
+                "usage: java -jar yaml2zk-xxx.jar file root"
+            }
+            val file = args[0]
+            val root = args[1]
+            Yaml2Zk().run(file, root)
+
+        }
     }
-    val file = args[0]
-    Yaml2Zk().run(file)
-
 }
 
+
 class Yaml2Zk {
-    fun run(file: String) {
+    fun run(file: String, root: String) {
         val curator = ZkClientFactory("localhost:2181").build()
         val jacksonObjectMapper = jacksonObjectMapper()
 
@@ -47,7 +54,6 @@ class Yaml2Zk {
                     val config = yaml.loadAs(ins, Properties::class.java)
                     PairParser(config).parse()
                 }
-        val root = "/test"
 
         var existed = false
         map.forEach { (path, value) ->
