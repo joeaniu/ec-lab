@@ -27,17 +27,35 @@ class Yaml2zkBootstrap{
     }
 }
 
-@Command(name = "yaml2zk", mixinStandardHelpOptions = true, version = ["yaml2zk 1.0"],
+@Command(name = "yaml2zk", mixinStandardHelpOptions = true, version = ["1.0"],
         description = ["Copy the contents of a yaml file into a zookeeper cluster as central configurations. "])
 class Yaml2Zk: Callable<Int> {
 
-    @Parameters(index = "0", description = ["The yaml file.", "If it starts with 'classpath:', the app will search the file as a resource in the classpath."])
+    @Parameters(
+            index = "0",
+            description = [
+                "The yaml file.",
+                "If it starts with 'classpath:', the app will search the file as a resource in the classpath."
+            ]
+    )
     private var file: String? = null
 
-    @Option(names = ["-r", "--root"], description = ["The root of the znode.", "default='/test'"])
-    private var root = "/test"
+    @Option(
+            names = ["-r", "--root"],
+            description = [
+                "The root of the znode.",
+                "default='/test'"
+            ]
+    )
+    private var root: String = "/test"
 
-    @Option(names = ["-c", "--connect-string"], description = ["The connect-string of the zookeeper cluster.", "default='localhost:2181'"])
+    @Option(
+            names = ["-c", "--connect-string"],
+            description = [
+                "The connect-string of the zookeeper cluster.",
+                "default='localhost:2181'"
+            ]
+    )
     private var connectString = "localhost:2181"
 
     override fun call(): Int{
