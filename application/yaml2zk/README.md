@@ -17,8 +17,8 @@
 ```bash
 cd yaml2zk/build/distributions
 tar vxf *tar
-cp -rf yaml2zk-boot-0.0.1-SNAPSHOT $target
-cd $target/bin
+cp -rf yaml2zk-boot-0.0.1-SNAPSHOT $destination
+cd $destination/bin
 # run the program and show the help
 ./yaml2zk --help
 ```
