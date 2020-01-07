@@ -54,6 +54,21 @@ dependencies {
 
     implementation("info.picocli:picocli:4.1.4")
 
+    val log4j2Version = "2.11.1"
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version")
+    implementation("org.apache.logging.log4j:log4j-core:$log4j2Version"){
+        //exclusions for avoiding conflict.
+        exclude(group = "ch.qos.logback", module = "logback-classic")
+        exclude(group = "ch.qos.logback", module = "log4j-to-slf4j")
+    }
+    implementation("org.apache.logging.log4j:log4j-jul:$log4j2Version")
+    implementation("org.slf4j:jul-to-slf4j:1.7.25")
+}
+
+configurations{
+    implementation{
+        exclude(group =  "org.springframework.boot", module = "spring-boot-starter-logging")
+    }
 }
 
 tasks.withType<Test> {

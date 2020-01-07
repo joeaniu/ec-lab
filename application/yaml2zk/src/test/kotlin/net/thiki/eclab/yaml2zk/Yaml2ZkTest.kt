@@ -15,7 +15,7 @@ internal class Yaml2ZkTest {
         val cut = Yaml2Zk()
 
 //        cut.run("path_to/test.yaml")
-        CommandLine(cut).execute("classpath:/test.yaml", "/test")
+        CommandLine(cut).execute("classpath:/test.yaml", "-r=/test")
     }
 
     @Test

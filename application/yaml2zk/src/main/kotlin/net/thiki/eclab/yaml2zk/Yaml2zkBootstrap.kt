@@ -33,6 +33,7 @@ class Yaml2Zk: Callable<Int> {
 
     @Parameters(
             index = "0",
+            arity = "0..1",
             description = [
                 "The yaml file.",
                 "If it starts with 'classpath:', the app will search the file as a resource in the classpath."
@@ -56,7 +57,16 @@ class Yaml2Zk: Callable<Int> {
                 "default='localhost:2181'"
             ]
     )
-    private var connectString = "localhost:2181"
+    private var connectString: String = "localhost:2181"
+
+    @Option(
+            names = ["-f", "--force-override"],
+            description = [
+                "By default, the program will exit when encounter any existed znode and print these znodes' path.",
+                "If -f is set, the program will override the znodes with warnings."
+            ]
+    )
+    private var forceOverride: Boolean = false
 
     override fun call(): Int{
         assert(file != null){
@@ -80,15 +90,26 @@ class Yaml2Zk: Callable<Int> {
                     PairParser(config).parse()
                 }
 
-        var existed = false
+        println("\n\n")
+        println("printing the contents: ")
         map.forEach { (path, value) ->
             println("$path->$value")
+        }
+
+        println("\n\n")
+        var existed = false
+        map.forEach { (path, value) ->
             val stat = curator.checkExists()
                     .forPath("$root/$path")
-            if (stat != null){
+            if (stat != null) {
                 println("warning: $path exists already, will be overridden.")
                 existed = true
             }
+        }
+
+        if (!forceOverride && existed){
+            println("There are some path already exists, nothing changes.")
+            return -99
         }
 
         map.forEach { (path, value) ->
@@ -102,6 +123,8 @@ class Yaml2Zk: Callable<Int> {
                         .forPath("$root/$path", value.toByteArray())
             }
         }
+        println("\n\n")
+        println("done.")
         return 0
     }
 }
