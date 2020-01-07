@@ -52,6 +52,8 @@ dependencies {
     implementation("org.apache.curator:curator-x-async:${curatorVersion}")
     implementation("org.apache.curator:curator-x-discovery:${curatorVersion}")
 
+    implementation("info.picocli:picocli:4.1.4")
+
 }
 
 tasks.withType<Test> {

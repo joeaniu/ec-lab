@@ -1,15 +1,17 @@
 package net.thiki.eclab.yaml2zk
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.retry.RetryNTimes
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
 import org.yaml.snakeyaml.Yaml
+import picocli.CommandLine
+import picocli.CommandLine.*
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
+import java.util.concurrent.Callable
+
 
 @SpringBootApplication
 class Yaml2zkBootstrap{
@@ -18,31 +20,36 @@ class Yaml2zkBootstrap{
 
         @JvmStatic
         fun main(args: Array<String>) {
-            runApplication<Yaml2zkBootstrap>(*args)
+//            runApplication<Yaml2zkBootstrap>(*args)
 
-            //https://www.baeldung.com/jackson
-
-            assert(args.size == 2) {
-                "usage: java -jar yaml2zk-xxx.jar file root"
-            }
-            val file = args[0]
-            val root = args[1]
-            Yaml2Zk().run(file, root)
-
+            CommandLine(Yaml2Zk()).execute(*args)
         }
     }
 }
 
+@Command(name = "yaml2zk", mixinStandardHelpOptions = true, version = ["yaml2zk 1.0"],
+        description = ["Copy the contents of a yaml file into a zookeeper cluster as central configurations. "])
+class Yaml2Zk: Callable<Int> {
 
-class Yaml2Zk {
-    fun run(file: String, root: String) {
-        val curator = ZkClientFactory("localhost:2181").build()
-        val jacksonObjectMapper = jacksonObjectMapper()
+    @Parameters(index = "0", description = ["The yaml file.", "If it starts with 'classpath:', the app will search the file as a resource in the classpath."])
+    private var file: String? = null
+
+    @Option(names = ["-r", "--root"], description = ["The root of the znode.", "default='/test'"])
+    private var root = "/test"
+
+    @Option(names = ["-c", "--connect-string"], description = ["The connect-string of the zookeeper cluster.", "default='localhost:2181'"])
+    private var connectString = "localhost:2181"
+
+    override fun call(): Int{
+        assert(file != null){
+            "Must specify the file in the first parameter."
+        }
+        val curator = ZkClientFactory(connectString).build()
 
         val yaml = Yaml()
         val prefix = "classpath:"
-        val inputStream = if (file.startsWith(prefix)) {
-            val realFile = file.substring(prefix.length)
+        val inputStream = if (file!!.startsWith(prefix)) {
+            val realFile = file!!.substring(prefix.length)
             println("realFile=$realFile.........")
             Yaml2Zk::class.java.getResourceAsStream(realFile)
         } else {
@@ -61,7 +68,7 @@ class Yaml2Zk {
             val stat = curator.checkExists()
                     .forPath("$root/$path")
             if (stat != null){
-                println("warning: $path exists already, will be overrided.")
+                println("warning: $path exists already, will be overridden.")
                 existed = true
             }
         }
@@ -77,6 +84,7 @@ class Yaml2Zk {
                         .forPath("$root/$path", value.toByteArray())
             }
         }
+        return 0
     }
 }
 
