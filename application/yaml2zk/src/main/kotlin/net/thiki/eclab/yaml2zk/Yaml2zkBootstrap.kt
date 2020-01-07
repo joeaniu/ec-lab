@@ -94,7 +94,7 @@ class PairParser(private val config: Properties) {
         if (value is Map<*, *>) {
             prefixKeys(key, value).forEach { mapProps(it.key, it.value!!) }
         } else {
-            map[key] = value.toString()
+            map[key.replace(".", "/")] = value.toString()
         }
     }
 
