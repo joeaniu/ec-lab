@@ -23,5 +23,6 @@
 hs_err_pid*
 /.idea/
 /.gradle/
-/application/yaml2zk/build/
 /build/
+/applications/yaml2zk/build/
+/applications/yaml2zk/out/
