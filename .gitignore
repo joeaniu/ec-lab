@@ -26,3 +26,5 @@ hs_err_pid*
 /build/
 /applications/yaml2zk/build/
 /applications/yaml2zk/out/
+/demos/gist/build/
+/demos/gist/out/

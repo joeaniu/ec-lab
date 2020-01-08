@@ -1,7 +1,8 @@
 rootProject.name = "ec-lab"
 
 include(
-        ":application:yaml2zk"
+        ":applications:yaml2zk",
+        ":demos:gist"
 )
 //include(
 //        ":components:yaml2zk"
