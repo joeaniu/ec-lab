@@ -5,6 +5,7 @@ import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.retry.RetryNTimes
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.constructor.Constructor
 import picocli.CommandLine
 import picocli.CommandLine.*
 import java.nio.file.Files
@@ -68,29 +69,52 @@ class Yaml2Zk: Callable<Int> {
     )
     private var forceOverride: Boolean = false
 
+    @Option(
+            names = ["-s", "--spring-multiple-profiles-support"],
+            description = [
+                "Support multiple profiles in one application.yaml file."
+            ]
+    )
+    private var springBootSupport: Boolean = false
+
+
     override fun call(): Int{
         assert(file != null){
             "Must specify the file in the first parameter."
         }
         val curator = ZkClientFactory(connectString).build()
 
-        val yaml = Yaml()
-        val prefix = "classpath:"
-        val inputStream = if (file!!.startsWith(prefix)) {
-            val realFile = file!!.substring(prefix.length)
+        val inputStream = if (file!!.startsWith("classpath:")) {
+            val realFile = file!!.substring("classpath:".length)
             println("realFile=$realFile.........")
             Yaml2Zk::class.java.getResourceAsStream(realFile)
         } else {
             Files.newInputStream(Paths.get(file))
         }
 
-        val map =
+        val yaml = Yaml(Constructor(Properties::class.java))
                 inputStream.use { ins ->
-                    val config = yaml.loadAs(ins, Properties::class.java)
-                    PairParser(config).parse()
+                    yaml.loadAll(ins).forEach { config ->
+                        config as Properties
+                        val map = PairParser(config).parse()
+                        val code = writeADocument(map, curator)
+                        if (code < 0) return code
+                    }
                 }
 
+        return 0
+    }
+
+    private fun writeADocument(map: Map<String, String>, curator: CuratorFramework): Int {
+
+        val theRoot = if (springBootSupport && map.containsKey("spring/profiles")){
+            "$root-${map["spring/profiles"]}"
+        }else{
+            root
+        }
+
         println("\n\n")
+        println("root=$theRoot")
         println("printing the contents: ")
         map.forEach { (path, value) ->
             println("$path->$value")
@@ -100,27 +124,27 @@ class Yaml2Zk: Callable<Int> {
         var existed = false
         map.forEach { (path, value) ->
             val stat = curator.checkExists()
-                    .forPath("$root/$path")
+                    .forPath("$theRoot/$path")
             if (stat != null) {
                 println("warning: $path exists already, will be overridden.")
                 existed = true
             }
         }
 
-        if (!forceOverride && existed){
+        if (!forceOverride && existed) {
             println("There are some path already exists, nothing changes.")
             return -99
         }
 
         map.forEach { (path, value) ->
             val stat = curator.checkExists()
-                    .forPath("$root/$path")
-            if (stat != null){
-                curator.setData().forPath("$root/$path", value.toByteArray())
-            }else{
+                    .forPath("$theRoot/$path")
+            if (stat != null) {
+                curator.setData().forPath("$theRoot/$path", value.toByteArray())
+            } else {
                 curator.create()
                         .creatingParentsIfNeeded()
-                        .forPath("$root/$path", value.toByteArray())
+                        .forPath("$theRoot/$path", value.toByteArray())
             }
         }
         println("\n\n")

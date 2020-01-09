@@ -42,9 +42,10 @@ dependencies {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.10.0")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.0")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.0")
+//    implementation("com.fasterxml.jackson.core:jackson-databind:2.10.0")
+//    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.0")
+//    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.0")
+    implementation("org.yaml:snakeyaml:1.25")
 
     implementation("org.apache.zookeeper:zookeeper:${zookeeperVersion}") {
         exclude(group = "org.slf4j", module = "slf4j-log4j12")
