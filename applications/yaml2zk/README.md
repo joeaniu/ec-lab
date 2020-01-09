@@ -28,7 +28,7 @@ cd $destination/bin
 
 
 ```
-Usage: yaml2zk [-fhV] [-c=<connectString>] [-r=<root>] [<file>]
+Usage: yaml2zk [-fhsV] [-c=<connectString>] [-r=<root>] [<file>]
 Copy the contents of a yaml file into a zookeeper cluster as central
 configurations.
       [<file>]           The yaml file.
@@ -44,5 +44,7 @@ configurations.
   -h, --help             Show this help message and exit.
   -r, --root=<root>      The root of the znode.
                          default='/test'
+  -s, --spring-multiple-profiles-support
+                         Support multiple profiles in one application.yaml file.
   -V, --version          Print version information and exit.
 ```
