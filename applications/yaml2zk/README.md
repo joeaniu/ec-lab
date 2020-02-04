@@ -48,3 +48,9 @@ configurations.
                          Support multiple profiles in one application.yaml file.
   -V, --version          Print version information and exit.
 ```
+
+## example
+
+```
+yaml2zk -sf -c=localhost:2181 -r=/config/test ./application.yaml
+```
